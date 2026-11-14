@@ -1,0 +1,2250 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F5FBFA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1514" media="(prefers-color-scheme: dark)">
+<title>主页</title>
+<!--
+  ===========================================================================
+   Via 浏览器 · Material Design 3 主页 / 图标栏
+   材质：液态玻璃（初音蓝底 + FlClash 式透镜与棱边色散）
+  ---------------------------------------------------------------------------
+   导入：Via → 菜单 → 设置 → 主页 → 自定义主页 → 选择本地 HTML 文件
+
+   编辑图标：
+     · 点图标栏里的「编辑」→ 图标管理：添加 / 编辑 / 删除（删除可撤销）
+     · 右上角 ⋮ → 图标数据：复制 JSON 备份、粘贴导入、恢复默认
+
+   交互说明：
+     · 背景光斑与指针反向视差，没有光晕
+     · 玻璃固定上下 rim 高光，不跟随指针（与 FlClash 一致）
+     · 按住 dock 可在任意位置拖动透镜，松手后弹簧吸附最近图标；
+       按住时棱边色散持续显示，快速移动时透镜拉成不定形框
+
+   可调参数（都在 :root 里）：
+     --glass-fill / --glass-blur / --glass-sat / --glass-rim / --glass-line
+     --lg-orb-* / --lg-stage-* / --sheet-fill
+  ===========================================================================
+-->
+<style>
+/* ==========================================================================
+   01 · 设计令牌（MD3 Baseline，浅色）
+   ========================================================================== */
+:root {
+  color-scheme: light;
+  --primary: #007C77;
+  --on-primary: #FFFFFF;
+  --primary-container: #9DF2EB;
+  --on-primary-container: #00201E;
+  --secondary: #4A6361;
+  --secondary-container: #CCE8E4;
+  --on-secondary-container: #051F1D;
+  --tertiary: #3F6375;
+  --tertiary-container: #C2E8FF;
+  --on-tertiary-container: #001E2C;
+  --error: #B3261E;
+  --background: #F5FBFA;
+  --on-background: #171D1C;
+  --surface: #F5FBFA;
+  --on-surface: #171D1C;
+  --surface-variant: #DAE5E3;
+  --on-surface-variant: #3F4948;
+  --surface-container-low: #EFF5F4;
+  --surface-container: #E9EFEE;
+  --surface-container-high: #E3E9E8;
+  --surface-container-highest: #DDE4E3;
+  --surface-container-lowest: #FFFFFF;
+  --outline: #6F7978;
+  --outline-variant: #BEC9C7;
+  --inverse-surface: #2B3130;
+  --inverse-on-surface: #ECF2F0;
+  --inverse-primary: #80D5D0;
+
+  --elev-1: 0 1px 2px rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15);
+  --elev-3: 0 1px 3px rgba(0,0,0,.30), 0 4px 8px 3px rgba(0,0,0,.15);
+
+  --shape-xs: 4px;
+  --shape-sm: 8px;
+  --shape-md: 12px;
+  --shape-lg: 16px;
+  --shape-xl: 28px;
+  --shape-full: 9999px;
+
+  --ease: cubic-bezier(.2, 0, 0, 1);
+  --font: Roboto, "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
+          system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+
+  /* ---- 液态玻璃（参数取自 FlClash prism_ui 的 LiquidGlassStyle） ---- */
+  /* pill / banner：tint #F4F4F4 58%，saturation 2.1，haze 15.6dp(0.72) */
+  --glass-fill: rgba(244, 244, 244, .58);
+  --glass-fill-solid: #F4F4F5;
+  --glass-blur: 10px;
+  --glass-sat: 2.08;
+  /* rim：上下 1.2dp 高光；line：外侧 0.7dp 发丝线 */
+  --glass-rim: inset 0 1.2px 0 rgba(255, 255, 255, .55),
+               inset 0 -1px 0 rgba(255, 255, 255, .14);
+  --glass-line: 0 0 0 .7px rgba(0, 0, 0, .14);
+  /* 菜单：tint 55%，blur 12，brightness 1.1 */
+  --sheet-fill: rgba(251, 250, 255, .62);
+  --sheet-blur: 12px;
+  --sheet-sat: 2;
+
+  /* 背景：单一紫罗兰色系，避免虹彩 */
+  --lg-stage-top: #F6FDFC;
+  --lg-stage-bottom: #E3F3F0;
+  --lg-orb-1: #8DE7E1;
+  --lg-orb-2: #63D4CC;
+  --lg-orb-3: #D2F7F2;
+  --lg-orb-4: #3FC7BE;
+  --lg-orb-op: .70;
+  --lg-orb-blur: 64px;
+  --lg-vignette: rgba(255, 255, 255, .30);
+}
+
+/* ==========================================================================
+   02 · 深色令牌
+   ========================================================================== */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --primary: #80D5D0;
+  --on-primary: #003733;
+  --primary-container: #00504B;
+  --on-primary-container: #9DF2EB;
+  --secondary: #B0CCC8;
+  --secondary-container: #334B48;
+  --on-secondary-container: #CCE8E4;
+  --tertiary: #A7CCE0;
+  --tertiary-container: #26485A;
+  --on-tertiary-container: #C2E8FF;
+  --error: #F2B8B5;
+  --background: #0E1514;
+  --on-background: #DDE4E3;
+  --surface: #0E1514;
+  --on-surface: #DDE4E3;
+  --surface-variant: #3F4948;
+  --on-surface-variant: #BEC9C7;
+  --surface-container-low: #171D1C;
+  --surface-container: #1B2120;
+  --surface-container-high: #252B2A;
+  --surface-container-highest: #303635;
+  --surface-container-lowest: #090F0F;
+  --outline: #899392;
+  --outline-variant: #3F4948;
+  --inverse-surface: #DDE4E3;
+  --inverse-on-surface: #2B3130;
+  --inverse-primary: #007C77;
+
+  /* pill / banner 深色：surfaceContainer 提亮 7 tone，alpha .48，saturation 1.925 */
+  --glass-fill: rgba(43, 41, 49, .50);
+  --glass-fill-solid: #2B2937;
+  --glass-blur: 10px;
+  --glass-sat: 1.925;
+  --glass-rim: inset 0 1.1px 0 rgba(255, 255, 255, .24),
+               inset 0 -1px 0 rgba(0, 0, 0, .35);
+  --glass-line: 0 0 0 .7px rgba(0, 0, 0, .55);
+  /* 菜单深色：tint .63，blur 12，saturation 1.75，brightness 1.8 */
+  --sheet-fill: rgba(38, 36, 44, .66);
+  --sheet-blur: 12px;
+  --sheet-sat: 1.75;
+
+  --lg-orb-1: #0F6E69;
+  --lg-orb-2: #0B4F4B;
+  --lg-orb-3: #169089;
+  --lg-orb-4: #063B38;
+  --lg-orb-op: .62;
+  --lg-orb-blur: 66px;
+  --lg-stage-top: #0A1A18;
+  --lg-stage-bottom: #051010;
+  --lg-vignette: rgba(0, 0, 0, .55);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --primary: #80D5D0;
+    --on-primary: #003733;
+    --primary-container: #00504B;
+    --on-primary-container: #9DF2EB;
+    --secondary: #B0CCC8;
+    --secondary-container: #334B48;
+    --on-secondary-container: #CCE8E4;
+    --tertiary: #A7CCE0;
+    --tertiary-container: #26485A;
+    --on-tertiary-container: #C2E8FF;
+    --error: #F2B8B5;
+    --background: #0E1514;
+    --on-background: #DDE4E3;
+    --surface: #0E1514;
+    --on-surface: #DDE4E3;
+    --surface-variant: #3F4948;
+    --on-surface-variant: #BEC9C7;
+    --surface-container-low: #171D1C;
+    --surface-container: #1B2120;
+    --surface-container-high: #252B2A;
+    --surface-container-highest: #303635;
+    --surface-container-lowest: #090F0F;
+    --outline: #899392;
+    --outline-variant: #3F4948;
+    --inverse-surface: #DDE4E3;
+    --inverse-on-surface: #2B3130;
+    --inverse-primary: #007C77;
+
+    /* pill / banner 深色：surfaceContainer 提亮 7 tone，alpha .48，saturation 1.925 */
+    --glass-fill: rgba(43, 41, 49, .50);
+    --glass-fill-solid: #2B2937;
+    --glass-blur: 10px;
+    --glass-sat: 1.925;
+    --glass-rim: inset 0 1.1px 0 rgba(255, 255, 255, .24),
+                 inset 0 -1px 0 rgba(0, 0, 0, .35);
+    --glass-line: 0 0 0 .7px rgba(0, 0, 0, .55);
+    --sheet-fill: rgba(38, 36, 44, .66);
+    --sheet-blur: 12px;
+    --sheet-sat: 1.75;
+
+    --lg-orb-1: #0F6E69;
+    --lg-orb-2: #0B4F4B;
+    --lg-orb-3: #169089;
+    --lg-orb-4: #063B38;
+    --lg-orb-op: .62;
+    --lg-orb-blur: 66px;
+    --lg-stage-top: #0A1A18;
+    --lg-stage-bottom: #051010;
+    --lg-vignette: rgba(0, 0, 0, .55);
+  }
+}
+
+/* ==========================================================================
+   03 · 基础
+   ========================================================================== */
+* { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
+
+html, body { margin: 0; padding: 0; min-height: 100%; }
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.43;
+  letter-spacing: .25px;
+  color: var(--on-background);
+  background-color: var(--background);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .3s var(--ease), color .3s var(--ease);
+}
+
+body.sheet-open { overflow: hidden; }
+
+/* 主题切换：整页交叉淡入（View Transitions），旧内核退回 CSS 过渡 */
+@keyframes lg-vt-out { to { opacity: 0; } }
+@keyframes lg-vt-in { from { opacity: 0; } }
+::view-transition-old(root) { animation: lg-vt-out .26s var(--ease) both; }
+::view-transition-new(root) { animation: lg-vt-in .34s var(--ease) both; }
+
+.theme-fade body,
+.theme-fade .glass,
+.theme-fade .md3-sheet {
+  transition: background-color .35s var(--ease), color .35s var(--ease);
+}
+
+/* ==========================================================================
+   04 · 动态背景：单色光斑 + 指针光晕 + 颗粒
+   ========================================================================== */
+.lg-stage {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100lvh;
+  height: var(--stage-h, 100lvh);
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 50% -8%,
+      color-mix(in srgb, var(--primary) 14%, transparent) 0%,
+      transparent 62%),
+    linear-gradient(180deg, var(--lg-stage-top) 0%, var(--lg-stage-bottom) 100%);
+}
+
+.lg-orb {
+  position: absolute;
+  display: block;
+  width: 66vmax;
+  height: 66vmax;
+  border-radius: 50%;
+  filter: blur(var(--lg-orb-blur));
+  opacity: var(--lg-orb-op);
+  will-change: transform, translate;
+  /* 指针反向视差（与 transform 动画叠加，互不干扰） */
+  translate: calc(var(--bx, 0px) * var(--depth, .5))
+             calc(var(--by, 0px) * var(--depth, .5));
+}
+
+.lg-orb--a {
+  top: -28vmax; left: -24vmax; --depth: .30;
+  background: var(--lg-orb-1);
+  animation: lg-drift-a 30s ease-in-out infinite alternate;
+}
+.lg-orb--b {
+  top: 18vmax; right: -34vmax; --depth: .85;
+  background: var(--lg-orb-2);
+  animation: lg-drift-b 38s ease-in-out infinite alternate;
+}
+.lg-orb--c {
+  bottom: -30vmax; left: -20vmax; --depth: .55;
+  background: var(--lg-orb-3);
+  animation: lg-drift-c 34s ease-in-out infinite alternate;
+}
+.lg-orb--d {
+  bottom: -14vmax; right: -26vmax; --depth: .70;
+  background: var(--lg-orb-4);
+  opacity: calc(var(--lg-orb-op) * .8);
+  animation: lg-drift-d 44s ease-in-out infinite alternate;
+}
+
+@keyframes lg-drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(7vmax, 5vmax, 0) scale(1.1); }
+}
+@keyframes lg-drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.05); }
+  to   { transform: translate3d(-9vmax, 4vmax, 0) scale(.93); }
+}
+@keyframes lg-drift-c {
+  from { transform: translate3d(0, 0, 0) scale(.96); }
+  to   { transform: translate3d(6vmax, -7vmax, 0) scale(1.08); }
+}
+@keyframes lg-drift-d {
+  from { transform: translate3d(0, 0, 0) scale(1.06); }
+  to   { transform: translate3d(-6vmax, -5vmax, 0) scale(.95); }
+}
+
+/* 暗角 */
+.lg-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(115% 85% at 50% 22%,
+    transparent 46%, var(--lg-vignette) 100%);
+}
+
+.lg-grain {
+  position: absolute;
+  inset: -20%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+  opacity: .05;
+  mix-blend-mode: overlay;
+}
+[data-theme="dark"] .lg-grain { opacity: .075; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .lg-grain { opacity: .075; }
+}
+
+/* ==========================================================================
+   05 · 玻璃材质
+   --------------------------------------------------------------------------
+   对齐 FlClash（plugins/prism_ui/lib/liquid_glass.dart + shaders/liquid_glass.frag）：
+     · tint     半透明底色（浅色 #F4F4F4 58% / 深色 surfaceContainer 50%）
+     · 霜化      backdrop blur 10dp + saturate 2.08 / 1.925
+     · rim      上下 1.2dp 的白色高光，亮度向两端衰减
+     · line     外侧 0.7dp 深色发丝线（iOS 27 的描边）
+   色散只属于「透镜」，不属于玻璃本身，因此 .glass 不带任何彩虹。
+   ========================================================================== */
+.glass {
+  position: relative;
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  box-shadow: var(--glass-rim), var(--glass-line);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    background: var(--glass-fill-solid);
+  }
+}
+
+/* ==========================================================================
+   06 · 布局
+   ========================================================================== */
+.md3-home {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+  max-width: 560px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding:
+    calc(16px + env(safe-area-inset-top, 0px))
+    20px
+    calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ==========================================================================
+   07 · 顶部栏
+   ========================================================================== */
+.md3-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+}
+
+.md3-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: .1px;
+  color: var(--on-surface-variant);
+}
+
+.md3-brand .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--shape-full);
+  background-color: var(--primary);
+}
+
+.md3-actions { display: flex; gap: 2px; }
+
+.md3-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--shape-full);
+  color: var(--on-surface-variant);
+  background-color: transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background-color .15s var(--ease);
+}
+.md3-icon-btn:hover {
+  background-color: color-mix(in srgb, var(--on-surface) 8%, transparent);
+}
+.md3-icon-btn:active {
+  background-color: color-mix(in srgb, var(--on-surface) 12%, transparent);
+}
+.md3-icon-btn svg { display: block; }
+.md3-icon-btn svg[hidden] { display: none; }
+
+/* ==========================================================================
+   08 · 时间
+   ========================================================================== */
+.md3-hero { padding: 8px 4px 0; }
+
+.md3-clock {
+  margin: 0;
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 400;
+  letter-spacing: -.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--on-surface);
+}
+
+.md3-date {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: .25px;
+  color: var(--on-surface-variant);
+}
+
+/* ==========================================================================
+   09 · 搜索栏
+   ========================================================================== */
+.md3-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 56px;
+  padding: 0 8px 0 16px;
+  border-radius: var(--shape-full);
+  transition: box-shadow .25s var(--ease);
+}
+.md3-search:focus-within {
+  box-shadow: var(--glass-rim), var(--glass-line),
+              0 0 0 3px color-mix(in srgb, var(--primary) 28%, transparent);
+}
+
+.md3-search-icon { flex: none; color: var(--on-surface-variant); }
+
+.md3-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: .5px;
+  color: var(--on-surface);
+  caret-color: var(--primary);
+}
+.md3-search-input::placeholder {
+  color: var(--on-surface-variant);
+  opacity: .85;
+}
+.md3-search-input::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+.md3-send {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--shape-full);
+  color: var(--on-primary);
+  background-color: var(--primary);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow .2s var(--ease), transform .15s var(--ease);
+}
+.md3-send:hover { box-shadow: var(--elev-1); }
+.md3-send:active { transform: scale(.96); }
+
+/* ==========================================================================
+   10 · 搜索引擎 Chip
+   ========================================================================== */
+.md3-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: -6px;
+}
+
+.md3-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 16px;
+  border: 1px solid color-mix(in srgb, var(--outline) 38%, transparent);
+  border-radius: var(--shape-full);
+  background-color: color-mix(in srgb, var(--surface-container-high) 58%, transparent);
+  color: var(--on-surface-variant);
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: .1px;
+  white-space: nowrap;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background-color .15s var(--ease), color .15s var(--ease),
+              border-color .15s var(--ease);
+}
+.md3-chip:hover {
+  background-color: color-mix(in srgb, var(--on-surface) 7%, transparent);
+}
+.md3-chip.is-selected {
+  padding-left: 12px;
+  border-color: transparent;
+  background-color: color-mix(in srgb, var(--secondary-container) 72%, transparent);
+  color: var(--on-secondary-container);
+}
+.md3-chip .check {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: width .2s var(--ease), opacity .2s var(--ease), margin .2s var(--ease);
+}
+.md3-chip.is-selected .check {
+  width: 16px;
+  margin-right: 5px;
+  opacity: 1;
+}
+
+/* ==========================================================================
+   11 · 图标栏：一整块大圆角玻璃，里面是 MD3 抽象图案
+   ========================================================================== */
+.md3-dock {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--shape-xl);
+  padding: 14px 12px 10px;
+  touch-action: none;
+}
+
+/* 透镜：FlClash LiquidGlassStyle.lens
+   tint 透明 / bevel 5.5dp / dispersion 6.5dp / rim 0.6 / hairline 0.42
+   静止时无彩色，横向滑动时红蓝通道在棱边分离。 */
+.dock-lens {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 3;
+  background: transparent;
+  box-shadow:
+    inset 0 1.1px 0 rgba(255, 255, 255, .85),
+    inset 0 -1.1px 0 rgba(255, 255, 255, .40),
+    0 0 0 .7px rgba(0, 0, 0, .20),
+    inset calc(var(--disp, 0) * 2.6px) 0 0 -1.1px rgba(255, 56, 96, .55),
+    inset calc(var(--disp, 0) * -2.6px) 0 0 -1.1px rgba(40, 160, 255, .55),
+    inset 0 calc(var(--disp, 0) * 2.2px) 0 -1.1px rgba(255, 56, 96, .45),
+    inset 0 calc(var(--disp, 0) * -2.2px) 0 -1.1px rgba(40, 160, 255, .45);
+  transition: opacity .2s var(--ease), border-radius .22s var(--ease);
+  will-change: transform;
+}
+
+/* 快速移动时变成不定形的液态框 */
+.dock-lens.is-moving {
+  border-radius: 38% 62% 57% 43% / 52% 36% 64% 48%;
+}
+
+.md3-dock-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px 2px;
+}
+
+.md3-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px 6px;
+  border: 0;
+  border-radius: var(--shape-lg);
+  background: transparent;
+  font-family: inherit;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 抽象 MD3 图案本体 */
+.md3-tile-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  color: var(--tone, var(--primary));
+  transition: transform .2s var(--ease), opacity .15s var(--ease);
+}
+.md3-tile:hover .md3-tile-icon { transform: translateY(-1px); }
+.md3-tile:active .md3-tile-icon { transform: scale(.94); }
+/* 透镜压住哪个图标，哪个图标就被“放大” */
+.md3-tile.is-focus .md3-tile-icon { transform: scale(1.16); }
+
+.md3-tile-icon svg {
+  display: block;
+  width: 38px;
+  height: 38px;
+}
+
+.md3-tile-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  line-height: 14px;
+  letter-spacing: .4px;
+  color: var(--on-surface-variant);
+}
+
+/* 「添加」按钮 */
+.md3-tile--add .md3-tile-icon {
+  color: var(--on-surface-variant);
+  border: 1.5px dashed color-mix(in srgb, var(--outline) 55%, transparent);
+  border-radius: var(--shape-md);
+  filter: none;
+}
+.md3-tile--add:hover .md3-tile-icon {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* ==========================================================================
+   12 · 页脚
+   ========================================================================== */
+.md3-foot {
+  margin-top: auto;
+  padding-top: 6px;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: .4px;
+  text-align: center;
+  color: var(--on-surface-variant);
+  opacity: .72;
+}
+
+/* ==========================================================================
+   13 · 涟漪
+   ========================================================================== */
+.md3-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background-color: currentColor;
+  opacity: .14;
+  transform: scale(0);
+  pointer-events: none;
+  animation: md3-ripple .45s var(--ease) forwards;
+}
+@keyframes md3-ripple {
+  to { transform: scale(1); opacity: 0; }
+}
+
+/* ==========================================================================
+   14 · 遮罩 / 底部面板
+   ========================================================================== */
+.md3-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background-color: rgba(0, 0, 0, .32);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .25s var(--ease), visibility .25s var(--ease);
+}
+.md3-scrim.is-open { opacity: 1; visibility: visible; }
+
+.md3-sheet {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 50;
+  width: 100%;
+  max-width: 560px;
+  max-height: 88vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 24px calc(24px + env(safe-area-inset-bottom, 0px));
+  border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+  border-top: 1px solid rgba(255, 255, 255, .16);
+  background-color: var(--sheet-fill);
+  color: var(--on-surface);
+  -webkit-backdrop-filter: blur(var(--sheet-blur)) saturate(var(--sheet-sat));
+  backdrop-filter: blur(var(--sheet-blur)) saturate(var(--sheet-sat));
+  box-shadow: var(--glass-rim), var(--glass-line),
+              0 8px 29px rgba(0, 0, 0, .14);
+  transform: translate(-50%, 100%);
+  visibility: hidden;
+  transition: transform .3s var(--ease), visibility .3s var(--ease);
+}
+.md3-sheet.is-open {
+  transform: translate(-50%, 0);
+  visibility: visible;
+}
+
+.md3-sheet-handle {
+  width: 32px;
+  height: 4px;
+  margin: 4px auto 16px;
+  border-radius: var(--shape-full);
+  background-color: var(--surface-variant);
+}
+
+.editor-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 2px;
+}
+.editor-head h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.editor-head .md3-support { margin: 2px 0 0; }
+
+.editor-preview {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--shape-md);
+  background-color: color-mix(in srgb, var(--surface-container-high) 60%, transparent);
+  flex: none;
+}
+.editor-preview svg { width: 36px; height: 36px; }
+
+.md3-support {
+  margin: 4px 0 14px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--on-surface-variant);
+}
+
+.md3-field-label {
+  display: block;
+  margin: 12px 0 6px;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: .4px;
+  color: var(--on-surface-variant);
+}
+
+.md3-field {
+  display: block;
+  width: 100%;
+  height: 52px;
+  padding: 0 14px;
+  border: 1px solid var(--outline);
+  border-radius: var(--shape-xs);
+  background-color: color-mix(in srgb, var(--surface-container-lowest) 50%, transparent);
+  color: var(--on-surface);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 24px;
+  caret-color: var(--primary);
+  transition: border-color .15s var(--ease), box-shadow .15s var(--ease);
+}
+.md3-field::placeholder { color: var(--on-surface-variant); opacity: .7; }
+.md3-field:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+textarea.md3-field {
+  height: 168px;
+  padding: 12px 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 18px;
+  resize: vertical;
+}
+
+.md3-error {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--error);
+}
+
+/* 图案选择器 */
+.md3-patterns {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.md3-pattern-btn {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--outline) 40%, transparent);
+  border-radius: var(--shape-md);
+  background-color: color-mix(in srgb, var(--surface-container-high) 40%, transparent);
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  transition: border-color .15s var(--ease), background-color .15s var(--ease),
+              color .15s var(--ease), transform .15s var(--ease);
+}
+.md3-pattern-btn svg { width: 30px; height: 30px; display: block; }
+.md3-pattern-btn:hover { transform: translateY(-1px); }
+.md3-pattern-btn.is-selected {
+  border-color: var(--primary);
+  background-color: color-mix(in srgb, var(--primary-container) 62%, transparent);
+  color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+/* 色调选择器 */
+.md3-tones {
+  display: flex;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.md3-tone-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--shape-full);
+  background-color: var(--tone-color);
+  cursor: pointer;
+  position: relative;
+  transition: transform .15s var(--ease);
+}
+.md3-tone-btn:active { transform: scale(.92); }
+.md3-tone-btn.is-selected {
+  box-shadow: 0 0 0 2px var(--surface-container-low), 0 0 0 4px var(--on-surface);
+}
+
+/* 按钮 */
+.md3-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--shape-full);
+  background-color: transparent;
+  color: var(--primary);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: .1px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background-color .15s var(--ease), box-shadow .15s var(--ease);
+}
+.md3-btn:hover { background-color: color-mix(in srgb, var(--primary) 8%, transparent); }
+
+.md3-btn--filled {
+  background-color: var(--primary);
+  color: var(--on-primary);
+}
+.md3-btn--filled:hover {
+  box-shadow: var(--elev-1);
+  background-image: linear-gradient(rgba(255,255,255,.08), rgba(255,255,255,.08));
+}
+
+.md3-btn--danger { color: var(--error); }
+.md3-btn--danger:hover { background-color: color-mix(in srgb, var(--error) 8%, transparent); }
+
+.md3-sheet-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+}
+.md3-sheet-actions .spacer { flex: 1 1 auto; }
+
+/* 图标管理面板 */
+.manage-add {
+  width: 100%;
+  margin: 6px 0 12px;
+  gap: 8px;
+}
+.manage-add svg { display: block; }
+
+.md3-manage-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.manage-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline) 15%, transparent);
+}
+.manage-row:last-child { border-bottom: 0; }
+
+.manage-ico {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  color: var(--tone, var(--primary));
+}
+.manage-ico svg { width: 26px; height: 26px; display: block; }
+
+.manage-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+  color: var(--on-surface);
+}
+
+.manage-row .md3-btn {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 13px;
+  flex: none;
+}
+
+/* ==========================================================================
+   15 · Snackbar
+   ========================================================================== */
+.md3-snackbar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 288px;
+  max-width: min(560px, calc(100vw - 32px));
+  padding: 8px 8px 8px 16px;
+  border-radius: var(--shape-xs);
+  background-color: color-mix(in srgb, var(--inverse-surface) 90%, transparent);
+  color: var(--inverse-on-surface);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
+  box-shadow: var(--elev-3), inset 0 1px 0 rgba(255, 255, 255, .16);
+  font-size: 14px;
+  line-height: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 16px);
+  transition: opacity .2s var(--ease), transform .2s var(--ease),
+              visibility .2s var(--ease);
+}
+.md3-snackbar.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+.md3-snackbar span { flex: 1 1 auto; }
+.md3-snackbar button {
+  flex: none;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--shape-full);
+  background: transparent;
+  color: var(--inverse-primary);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   16 · 响应式 / 无障碍
+   ========================================================================== */
+@media (min-width: 600px) {
+  .md3-dock-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .md3-clock { font-size: 44px; line-height: 52px; }
+}
+/* 桌面：更宽的版心、单行图标栏、放大的字号与控件 */
+@media (min-width: 1024px) {
+  .md3-home {
+    max-width: 1040px;
+    gap: 28px;
+    padding: 48px 40px 40px;
+  }
+  .md3-topbar { min-height: 56px; }
+  .md3-brand { font-size: 15px; }
+  .md3-icon-btn { width: 44px; height: 44px; }
+
+  .md3-hero { padding: 12px 4px 0; }
+  .md3-clock { font-size: 56px; line-height: 64px; letter-spacing: -1px; }
+  .md3-date { font-size: 15px; line-height: 22px; }
+
+  .md3-search { height: 64px; max-width: 820px; padding: 0 10px 0 20px; }
+  .md3-search-input { font-size: 17px; }
+  .md3-send { width: 44px; height: 44px; }
+
+  .md3-chips { gap: 10px; }
+  .md3-chip { height: 36px; padding: 0 18px; font-size: 14px; }
+
+  .md3-dock { padding: 22px 20px 16px; border-radius: 32px; }
+  .md3-dock-grid {
+    grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+    gap: 10px 8px;
+  }
+  .md3-tile { padding: 10px 6px 8px; gap: 8px; }
+  .md3-tile-icon { width: 52px; height: 52px; }
+  .md3-tile-icon svg { width: 42px; height: 42px; }
+  .md3-tile-label { font-size: 12px; line-height: 16px; }
+
+  .dock-lens { width: 72px; height: 72px; border-radius: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<!-- 动态背景：四团单色光斑（反向视差）+ 指针光晕 + 颗粒 -->
+<div class="lg-stage" aria-hidden="true">
+  <span class="lg-orb lg-orb--a"></span>
+  <span class="lg-orb lg-orb--b"></span>
+  <span class="lg-orb lg-orb--c"></span>
+  <span class="lg-orb lg-orb--d"></span>
+  <span class="lg-grain"></span>
+</div>
+
+<main class="md3-home">
+
+  <!-- 顶部栏 -->
+  <header class="md3-topbar">
+    <div class="md3-brand">
+      <span class="dot" aria-hidden="true"></span>
+      <span>主页</span>
+    </div>
+    <div class="md3-actions">
+      <button class="md3-icon-btn" id="themeBtn" type="button" aria-label="切换深色模式">
+        <svg id="iconMoon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M20.4 14.2A8.5 8.5 0 0 1 9.8 3.6 8.5 8.5 0 1 0 20.4 14.2Z"/>
+        </svg>
+        <svg id="iconSun" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" hidden>
+          <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/>
+        </svg>
+      </button>
+      <button class="md3-icon-btn" id="dataBtn" type="button" aria-label="图标数据：备份、导入、恢复默认">
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="5" r="2" fill="currentColor"/>
+          <circle cx="12" cy="12" r="2" fill="currentColor"/>
+          <circle cx="12" cy="19" r="2" fill="currentColor"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 时间 -->
+  <section class="md3-hero" aria-label="当前时间">
+    <p class="md3-clock" id="clock">--:--</p>
+    <p class="md3-date" id="date">加载中…</p>
+  </section>
+
+  <!-- 搜索 -->
+  <form class="md3-search glass" id="searchForm" role="search" autocomplete="off">
+    <svg class="md3-search-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <input class="md3-search-input" id="q" type="search" inputmode="search"
+           placeholder="搜索或输入网址" enterkeyhint="go" aria-label="搜索">
+    <button class="md3-send" type="submit" aria-label="开始搜索">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4.5 12h14M12.5 6l6 6-6 6" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </form>
+
+  <!-- 搜索引擎 -->
+  <div class="md3-chips" role="group" aria-label="搜索引擎">
+    <button class="md3-chip is-selected" type="button" data-engine="baidu" aria-pressed="true">
+      <svg class="check" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>百度</span>
+    </button>
+    <button class="md3-chip" type="button" data-engine="bing" aria-pressed="false">
+      <svg class="check" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>必应</span>
+    </button>
+    <button class="md3-chip" type="button" data-engine="google" aria-pressed="false">
+      <svg class="check" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>谷歌</span>
+    </button>
+  </div>
+
+  <!-- 图标栏：一整块大圆角玻璃 -->
+  <section class="md3-dock glass" id="dock" aria-label="快捷图标">
+    <span class="dock-lens" id="dockLens" aria-hidden="true"></span>
+    <div class="md3-dock-grid" id="dockGrid"></div>
+  </section>
+
+  <footer class="md3-foot" id="footHint" hidden></footer>
+</main>
+
+<div class="md3-scrim" id="scrim"></div>
+
+<!-- 编辑 / 添加面板 -->
+<div class="md3-sheet" id="editorSheet" role="dialog" aria-modal="true" aria-labelledby="editorTitle">
+  <div class="md3-sheet-handle" aria-hidden="true"></div>
+
+  <div class="editor-head">
+    <span class="md3-tile-icon editor-preview" id="editorPreview" aria-hidden="true"></span>
+    <div>
+      <h2 id="editorTitle">添加图标</h2>
+      <p class="md3-support">选一个 MD3 抽象图案</p>
+    </div>
+  </div>
+
+  <label class="md3-field-label" for="fName">名称</label>
+  <input class="md3-field" id="fName" type="text" placeholder="例如：哔哩哔哩" autocomplete="off">
+
+  <label class="md3-field-label" for="fUrl">链接</label>
+  <input class="md3-field" id="fUrl" type="text" inputmode="url" placeholder="https://m.bilibili.com" autocomplete="off">
+
+  <span class="md3-field-label">图案</span>
+  <div class="md3-patterns" id="patterns" role="group" aria-label="MD3 图案"></div>
+
+  <span class="md3-field-label">色调</span>
+  <div class="md3-tones" id="tones" role="group" aria-label="色调"></div>
+
+  <p class="md3-error" id="editorError" hidden></p>
+
+  <div class="md3-sheet-actions">
+    <button class="md3-btn md3-btn--danger" id="btnDelete" type="button" hidden>删除</button>
+    <span class="spacer"></span>
+    <button class="md3-btn" id="btnCancel" type="button">取消</button>
+    <button class="md3-btn md3-btn--filled" id="btnSave" type="button">保存</button>
+  </div>
+</div>
+
+<!-- 图标管理（点 ＋ 打开） -->
+<div class="md3-sheet" id="manageSheet" role="dialog" aria-modal="true" aria-labelledby="manageTitle">
+  <div class="md3-sheet-handle" aria-hidden="true"></div>
+  <h2 id="manageTitle" style="margin:0 0 4px;font-size:22px;font-weight:400">图标</h2>
+  <p class="md3-support">点「编辑」修改已有图标，或添加新的。</p>
+  <button class="md3-btn md3-btn--filled manage-add" id="btnAddIcon" type="button">
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    添加图标
+  </button>
+  <div class="md3-manage-list" id="manageList"></div>
+</div>
+
+<!-- 数据面板 -->
+<div class="md3-sheet" id="dataSheet" role="dialog" aria-modal="true" aria-labelledby="dataTitle">
+  <div class="md3-sheet-handle" aria-hidden="true"></div>
+  <h2 id="dataTitle" style="margin:0 0 4px;font-size:22px;font-weight:400">图标数据</h2>
+  <p class="md3-support" id="storageHint">
+    图标设置保存在本机浏览器里。清除浏览器数据或重装应用会丢失，
+    可以复制下面这段文本做备份，换机后粘贴回来点「导入」即可。
+  </p>
+  <textarea class="md3-field" id="dataText" spellcheck="false" aria-label="图标配置 JSON"></textarea>
+  <div class="md3-sheet-actions">
+    <button class="md3-btn" id="btnReset" type="button">恢复默认</button>
+    <span class="spacer"></span>
+    <button class="md3-btn" id="btnImport" type="button">导入</button>
+    <button class="md3-btn md3-btn--filled" id="btnCopy" type="button">复制</button>
+  </div>
+</div>
+
+<!-- Snackbar -->
+<div class="md3-snackbar" id="snackbar" role="status" aria-live="polite">
+  <span id="snackbarText"></span>
+  <button id="snackbarAction" type="button" hidden></button>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ======================================================================
+     0 · 常量
+     ====================================================================== */
+  var STORE_V2 = "md3-tiles-v2";
+  var STORE_V1 = "md3-tiles-v1";
+  var THEME_KEY = "md3-theme";
+  var ENGINE_KEY = "md3-engine";
+
+  /* MD3 抽象图案：只用圆、弧、圆角矩形，保持单色 */
+  var PATTERNS = {
+    orbit:
+      '<circle cx="16" cy="16" r="8.6" fill="none" stroke="currentColor" stroke-width="2.4" opacity=".92"/>' +
+      '<circle cx="23.5" cy="8.5" r="3.2" fill="currentColor" opacity=".55"/>',
+    arch:
+      '<path d="M7.5 25V15.5a8.5 8.5 0 0 1 17 0V25" fill="none" stroke="currentColor" ' +
+      'stroke-width="2.6" stroke-linecap="round" opacity=".92"/>' +
+      '<circle cx="16" cy="17" r="3" fill="currentColor" opacity=".45"/>',
+    ring:
+      '<circle cx="16" cy="16" r="8.6" fill="none" stroke="currentColor" stroke-width="4.4" opacity=".9"/>',
+    quad:
+      '<rect x="5.5" y="5.5" width="9.4" height="9.4" rx="3.2" fill="currentColor" opacity=".92"/>' +
+      '<rect x="17.1" y="5.5" width="9.4" height="9.4" rx="3.2" fill="currentColor" opacity=".36"/>' +
+      '<rect x="5.5" y="17.1" width="9.4" height="9.4" rx="3.2" fill="currentColor" opacity=".36"/>' +
+      '<rect x="17.1" y="17.1" width="9.4" height="9.4" rx="3.2" fill="currentColor" opacity=".92"/>',
+    pill:
+      '<rect x="5.5" y="8.5" width="21" height="6.6" rx="3.3" fill="currentColor" opacity=".92"/>' +
+      '<rect x="5.5" y="18.2" width="13.6" height="6.6" rx="3.3" fill="currentColor" opacity=".4"/>',
+    spark:
+      '<path d="M16 4.2l3.1 8.7 8.7 3.1-8.7 3.1L16 27.8l-3.1-8.7-8.7-3.1 8.7-3.1L16 4.2Z" ' +
+      'fill="currentColor" opacity=".9"/>',
+    wave:
+      '<path d="M5 19.5c3.4-6.8 6.9-6.8 10.3 0s6.9 6.8 10.3 0" fill="none" stroke="currentColor" ' +
+      'stroke-width="2.6" stroke-linecap="round" opacity=".92"/>' +
+      '<circle cx="16" cy="9.6" r="2.8" fill="currentColor" opacity=".42"/>',
+    step:
+      '<rect x="5.8" y="18.6" width="6.4" height="7.6" rx="2.2" fill="currentColor" opacity=".92"/>' +
+      '<rect x="12.9" y="12.6" width="6.4" height="13.6" rx="2.2" fill="currentColor" opacity=".55"/>' +
+      '<rect x="20" y="6.6" width="6.4" height="19.6" rx="2.2" fill="currentColor" opacity=".32"/>',
+    crescent:
+      '<path d="M21.8 5.6a10.6 10.6 0 1 0 0 20.8A12.4 12.4 0 0 1 21.8 5.6Z" ' +
+      'fill="currentColor" opacity=".9"/>'
+  };
+  var PATTERN_IDS = ["orbit", "arch", "ring", "quad", "pill", "spark", "wave", "step", "crescent"];
+
+  var TONES = {
+    primary: "var(--primary)",
+    secondary: "var(--secondary)",
+    tertiary: "var(--tertiary)",
+    neutral: "var(--on-surface-variant)"
+  };
+  var TONE_IDS = ["primary", "secondary", "tertiary", "neutral"];
+
+  var DEFAULT_TILES = [
+    { name: "哔哩哔哩", url: "https://m.bilibili.com", pattern: "orbit",  tone: "primary" },
+    { name: "知乎",     url: "https://www.zhihu.com",  pattern: "arch",   tone: "primary" },
+    { name: "微博",     url: "https://m.weibo.cn",     pattern: "wave",   tone: "secondary" },
+    { name: "淘宝",     url: "https://m.taobao.com",   pattern: "pill",   tone: "tertiary" },
+    { name: "百度",     url: "https://www.baidu.com",  pattern: "ring",   tone: "primary" },
+    { name: "GitHub",   url: "https://github.com",     pattern: "quad",   tone: "neutral" },
+    { name: "豆瓣",     url: "https://m.douban.com",   pattern: "spark",  tone: "secondary" },
+    { name: "YouTube",  url: "https://m.youtube.com",  pattern: "crescent", tone: "tertiary" }
+  ];
+
+  var ENDPOINTS = {
+    baidu: "https://www.baidu.com/s?word=",
+    bing: "https://cn.bing.com/search?q=",
+    google: "https://www.google.com/search?q="
+  };
+
+  /* ======================================================================
+     1 · 工具
+     ====================================================================== */
+  var $ = function (id) { return document.getElementById(id); };
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var root = document.documentElement;
+
+  function pad2(n) { return n < 10 ? "0" + n : "" + n; }
+  function clamp(v, min, max) { return v < min ? min : v > max ? max : v; }
+
+  function svgFor(pattern) {
+    var body = PATTERNS[pattern] || PATTERNS.orbit;
+    return '<svg viewBox="0 0 32 32" aria-hidden="true">' + body + "</svg>";
+  }
+
+  function normalizeTile(t, index) {
+    if (!t || typeof t !== "object") return null;
+    var url = String(t.url || "").trim();
+    if (!url) return null;
+    if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+
+    var name = String(t.name || "").trim() ||
+               url.replace(/^https?:\/\//i, "").split("/")[0];
+
+    var pattern = PATTERN_IDS.indexOf(t.pattern) >= 0
+      ? t.pattern
+      : PATTERN_IDS[(index || 0) % PATTERN_IDS.length];
+
+    var tone = TONE_IDS.indexOf(t.tone) >= 0 ? t.tone : "primary";
+
+    return { name: name, url: url, pattern: pattern, tone: tone };
+  }
+
+  /* ======================================================================
+     2 · 存储（v2 + 旧版 v1 迁移）
+     ====================================================================== */
+  var storageOK = true;
+  try {
+    window.localStorage.setItem("__md3_probe__", "1");
+    window.localStorage.removeItem("__md3_probe__");
+  } catch (e) {
+    storageOK = false;
+  }
+
+  var tiles = loadTiles();
+
+  function loadTiles() {
+    if (!storageOK) return DEFAULT_TILES.slice();
+
+    try {
+      var raw = window.localStorage.getItem(STORE_V2);
+      if (raw) {
+        var arr = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          var clean = arr.map(normalizeTile).filter(Boolean);
+          if (clean.length) return clean;
+        }
+      }
+
+      /* 从上一版（字母图标）迁移：按顺序分配图案 */
+      var oldRaw = window.localStorage.getItem(STORE_V1);
+      if (oldRaw) {
+        var oldArr = JSON.parse(oldRaw);
+        if (Array.isArray(oldArr)) {
+          var migrated = oldArr.map(function (t, i) {
+            return normalizeTile({
+              name: t && t.name,
+              url: t && t.url,
+              pattern: PATTERN_IDS[i % PATTERN_IDS.length],
+              tone: "primary"
+            }, i);
+          }).filter(Boolean);
+          if (migrated.length) {
+            try {
+              window.localStorage.setItem(STORE_V2, JSON.stringify(migrated));
+            } catch (err) {}
+            return migrated;
+          }
+        }
+      }
+    } catch (e) {}
+
+    return DEFAULT_TILES.slice();
+  }
+
+  function saveTiles() {
+    try {
+      window.localStorage.setItem(STORE_V2, JSON.stringify(tiles));
+    } catch (e) {
+      storageOK = false;
+      updateHint();
+    }
+  }
+
+  /* ======================================================================
+     3 · 时间
+     ====================================================================== */
+  var clockEl = $("clock");
+  var dateEl = $("date");
+
+  function tick() {
+    var d = new Date();
+    clockEl.textContent = pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+    dateEl.textContent = (d.getMonth() + 1) + "月" + d.getDate() + "日 星期" +
+      "日一二三四五六".charAt(d.getDay());
+  }
+  tick();
+  window.setInterval(tick, 10000);
+
+  /* ======================================================================
+     4 · 深色模式
+     ====================================================================== */
+  var themeBtn = $("themeBtn");
+  var iconMoon = $("iconMoon");
+  var iconSun = $("iconSun");
+
+  function currentDark() {
+    var t = root.getAttribute("data-theme");
+    if (t) return t === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+
+  function paintThemeIcon() {
+    var dark = currentDark();
+    iconMoon.toggleAttribute("hidden", dark);
+    iconSun.toggleAttribute("hidden", !dark);
+    themeBtn.setAttribute("aria-label", dark ? "切换到浅色模式" : "切换到深色模式");
+  }
+
+  try {
+    var savedTheme = window.localStorage.getItem(THEME_KEY);
+    if (savedTheme === "dark" || savedTheme === "light") {
+      root.setAttribute("data-theme", savedTheme);
+    }
+  } catch (e) {}
+  paintThemeIcon();
+
+  /* 键盘弹出时布局视口会变矮，固定背景若跟着压缩，整页会明显发暗。
+     只在高度明显缩小时锁定原高度；地址栏收起 / 旋转不触发。 */
+  var baseHeight = window.innerHeight;
+  window.addEventListener("resize", function () {
+    var h = window.innerHeight;
+    if (h >= baseHeight - 2) {
+      baseHeight = h;
+      root.style.removeProperty("--stage-h");
+    } else {
+      root.style.setProperty("--stage-h", baseHeight + "px");
+    }
+  }, { passive: true });
+
+  function applyTheme(next) {
+    var run = function () {
+      root.setAttribute("data-theme", next);
+      try { window.localStorage.setItem(THEME_KEY, next); } catch (e) {}
+      paintThemeIcon();
+    };
+    if (document.startViewTransition && !reduceMotion) {
+      document.startViewTransition(run);
+    } else {
+      root.classList.add("theme-fade");
+      run();
+      window.setTimeout(function () { root.classList.remove("theme-fade"); }, 420);
+    }
+  }
+
+  themeBtn.addEventListener("click", function () {
+    applyTheme(currentDark() ? "light" : "dark");
+  });
+
+  /* ======================================================================
+     5 · 搜索引擎
+     ====================================================================== */
+  var engine = "baidu";
+  try {
+    var savedEngine = window.localStorage.getItem(ENGINE_KEY);
+    if (savedEngine && ENDPOINTS[savedEngine]) engine = savedEngine;
+  } catch (e) {}
+
+  var chips = Array.prototype.slice.call(document.querySelectorAll(".md3-chip"));
+
+  function selectChip(name) {
+    engine = name;
+    chips.forEach(function (chip) {
+      var on = chip.getAttribute("data-engine") === name;
+      chip.classList.toggle("is-selected", on);
+      chip.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    try { window.localStorage.setItem(ENGINE_KEY, name); } catch (e) {}
+  }
+
+  chips.forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      selectChip(chip.getAttribute("data-engine"));
+    });
+  });
+  selectChip(engine);
+
+  /* ======================================================================
+     6 · 搜索
+     ====================================================================== */
+  var form = $("searchForm");
+  var input = $("q");
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var v = (input.value || "").trim();
+    if (!v) { input.focus(); return; }
+
+    if (/^https?:\/\//i.test(v)) { window.location.href = v; return; }
+
+    var looksLikeHost = /^[\w-]+(\.[\w-]+)+(\/[\w\-.~%!$&'()*+,;=:@\/?#]*)?$/;
+    if (looksLikeHost.test(v) && v.indexOf(" ") === -1) {
+      window.location.href = "https://" + v;
+      return;
+    }
+
+    window.location.href = ENDPOINTS[engine] + encodeURIComponent(v);
+  });
+
+  /* ======================================================================
+     7 · 涟漪
+     ====================================================================== */
+  function attachRipple(el) {
+    if (reduceMotion) return;
+    el.addEventListener("pointerdown", function (e) {
+      var rect = el.getBoundingClientRect();
+      var size = Math.max(rect.width, rect.height) * 2.2;
+      var span = document.createElement("span");
+      span.className = "md3-ripple";
+      span.style.width = span.style.height = size + "px";
+      span.style.left = (e.clientX - rect.left - size / 2) + "px";
+      span.style.top = (e.clientY - rect.top - size / 2) + "px";
+      el.appendChild(span);
+      span.addEventListener("animationend", function () { span.remove(); });
+    });
+  }
+
+  /* ======================================================================
+     8 · 图标栏渲染
+     ====================================================================== */
+  var dock = $("dock");
+  var dockGrid = $("dockGrid");
+  var editingIndex = -1;
+
+  function makeTile(t, index) {
+    var a = document.createElement("a");
+    a.className = "md3-tile";
+    a.href = t.url;
+    a.draggable = false;
+    a.setAttribute("aria-label", t.name);
+
+    var icon = document.createElement("span");
+    icon.className = "md3-tile-icon";
+    icon.style.setProperty("--tone", TONES[t.tone] || TONES.primary);
+    icon.innerHTML = svgFor(t.pattern);
+
+    var label = document.createElement("span");
+    label.className = "md3-tile-label";
+    label.textContent = t.name;
+
+    a.appendChild(icon);
+    a.appendChild(label);
+    attachRipple(a);
+
+    a.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+
+    return a;
+  }
+
+  function makeAddTile() {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "md3-tile md3-tile--add";
+    b.setAttribute("aria-label", "编辑图标");
+
+    var icon = document.createElement("span");
+    icon.className = "md3-tile-icon";
+    icon.innerHTML =
+      '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" fill="currentColor"/>' +
+      '<path d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0' +
+      'l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/></svg>';
+
+    var label = document.createElement("span");
+    label.className = "md3-tile-label";
+    label.textContent = "编辑";
+
+    b.appendChild(icon);
+    b.appendChild(label);
+    attachRipple(b);
+    b.addEventListener("click", function () { openManage(); });
+    return b;
+  }
+
+  function renderDock() {
+    dockGrid.textContent = "";
+    tiles.forEach(function (t, i) { dockGrid.appendChild(makeTile(t, i)); });
+    dockGrid.appendChild(makeAddTile());
+    refreshLightTargets();
+  }
+
+  function deleteTile(at) {
+    var removed = tiles[at];
+    if (!removed) return;
+    tiles.splice(at, 1);
+    saveTiles();
+    renderDock();
+    closeSheets();
+    showSnack("已删除 " + removed.name, "撤销", function () {
+      var pos = Math.min(at, tiles.length);
+      tiles.splice(pos, 0, removed);
+      saveTiles();
+      renderDock();
+      showSnack("已恢复 " + removed.name);
+    });
+  }
+
+  function openManage() {
+    renderManage();
+    openSheet(manageSheet);
+  }
+
+  function renderManage() {
+    manageList.textContent = "";
+    tiles.forEach(function (t, i) {
+      var row = document.createElement("div");
+      row.className = "manage-row";
+
+      var ico = document.createElement("span");
+      ico.className = "manage-ico";
+      ico.style.setProperty("--tone", TONES[t.tone] || TONES.primary);
+      ico.innerHTML = svgFor(t.pattern);
+
+      var name = document.createElement("span");
+      name.className = "manage-name";
+      name.textContent = t.name;
+
+      var edit = document.createElement("button");
+      edit.type = "button";
+      edit.className = "md3-btn";
+      edit.textContent = "编辑";
+      edit.addEventListener("click", function () {
+        closeSheets();
+        openEditor(i);
+      });
+
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "md3-btn md3-btn--danger";
+      del.textContent = "删除";
+      del.addEventListener("click", function () { deleteTile(i); });
+
+      row.appendChild(ico);
+      row.appendChild(name);
+      row.appendChild(edit);
+      row.appendChild(del);
+      manageList.appendChild(row);
+    });
+  }
+  /* ======================================================================
+     9 · 指针引擎：背景视差 + 液态透镜
+     ----------------------------------------------------------------------
+     · 按住可在 dock 任意位置拖动透镜，松手后弹簧吸附到最近图标
+     · 快速移动时透镜拉长成不定形框，弹簧给出骤加速 / 骤减速的收敛
+     · 按住不动时棱边色散持续可见（FlClash lens 的 dispersion）
+     ====================================================================== */
+  var stage = document.querySelector(".lg-stage");
+  var dockLens = $("dockLens");
+
+  var P = { x: -1, y: -1 };
+  var rafId = 0, running = false, lastFrameAt = 0, lastPointerAt = 0;
+  var rectFreshAt = 0;
+  var tileRects = [];
+  var tileNodes = [];
+  var lensX = 0, lensY = 0, velX = 0, velY = 0;
+  var targetX = 0, targetY = 0;
+  var lensVisible = false;
+  var dragging = false;
+  var hovering = false;
+  var suppressClick = false;
+  var downX = 0, downY = 0;
+  var focusIndex = -1;
+  var movingClass = false;
+  var fingerVelX = 0;
+  var pressedIndex = -1;
+
+  var lensSize = 64;
+  /* FlClash navigation_dock.dart: _followSpring 1024 / ratio .9 -> c = 57.6;
+     _travelSpring 400ms / bounce .15 -> k = 246.7, ratio .85 -> c = 26.7 */
+  var FOLLOW_K = 1024, FOLLOW_C = 57.6;
+  var TRAVEL_K = 246.74, TRAVEL_C = 26.7;
+
+  function refreshLightTargets() {
+    tileNodes = Array.prototype.slice.call(dockGrid.querySelectorAll(".md3-tile"));
+    tileRects = [];
+    rectFreshAt = 0;
+    focusIndex = -1;
+  }
+
+  function readRects() {
+    tileRects = [];
+    for (var i = 0; i < tileNodes.length; i++) {
+      var node = tileNodes[i];
+      var icon = node.querySelector(".md3-tile-icon");
+      var r = (icon || node).getBoundingClientRect();
+      tileRects.push({ cx: r.left + r.width / 2, cy: r.top + r.height / 2 });
+    }
+    lensSize = dockLens.offsetWidth || 64;
+    rectFreshAt = performance.now();
+  }
+
+  function nearestTile(x, y) {
+    var best = -1, bestD = 1e9;
+    for (var i = 0; i < tileRects.length; i++) {
+      var r = tileRects[i];
+      var dx = x - r.cx;
+      var dy = y - r.cy;
+      var d = Math.sqrt(dx * dx + dy * dy);
+      if (d < bestD) { bestD = d; best = i; }
+    }
+    return { index: best, distance: bestD };
+  }
+
+  function setFocus(index) {
+    if (index === focusIndex) return;
+    if (focusIndex >= 0 && tileNodes[focusIndex]) {
+      tileNodes[focusIndex].classList.remove("is-focus");
+    }
+    focusIndex = index;
+    if (index >= 0 && tileNodes[index]) {
+      tileNodes[index].classList.add("is-focus");
+    }
+  }
+
+  function frame(ts) {
+    var now = typeof ts === "number" ? ts : performance.now();
+    var dt = lastFrameAt ? Math.min((now - lastFrameAt) / 1000, 1 / 30) : 1 / 60;
+    lastFrameAt = now;
+
+    var w = window.innerWidth || 1;
+    var h = window.innerHeight || 1;
+    var nx = (P.x < 0 ? w / 2 : P.x) / w - .5;
+    var ny = (P.y < 0 ? h / 2 : P.y) / h - .5;
+    stage.style.setProperty("--bx", (nx * 44).toFixed(1) + "px");
+    stage.style.setProperty("--by", (ny * 44).toFixed(1) + "px");
+
+    if (now - rectFreshAt > 300) readRects();
+
+    var dockRect = dock.getBoundingClientRect();
+    var hit = nearestTile(P.x, P.y);
+
+    /* FlClash 的运动模型：位置是弹簧状态，不是手指位置的副本。
+       拖动时跟随 _followSpring（够硬但仍有 ~30ms 滞后），
+       松手后换成更软的 _travelSpring 吸附，带一点回弹。 */
+    var followX = Math.min(Math.max(P.x, dockRect.left + lensSize / 2),
+                           dockRect.right - lensSize / 2);
+    var followY = Math.min(Math.max(P.y, dockRect.top + lensSize / 2),
+                           dockRect.bottom - lensSize / 2);
+    var following = dragging || hovering;
+    var tX = following ? followX : targetX;
+    var tY = following ? followY : targetY;
+
+    if (following || lensVisible) {
+      var stiff = following ? FOLLOW_K : TRAVEL_K;
+      var damp = following ? FOLLOW_C : TRAVEL_C;
+      var steps = Math.max(1, Math.ceil(dt / (1 / 240)));
+      var h = dt / steps;
+      for (var step = 0; step < steps; step++) {
+        velX += ((tX - lensX) * stiff - velX * damp) * h;
+        velY += ((tY - lensY) * stiff - velY * damp) * h;
+        lensX += velX * h;
+        lensY += velY * h;
+      }
+      if (!following && Math.abs(tX - lensX) < .3 &&
+          Math.abs(tY - lensY) < .3 &&
+          Math.abs(velX) < 5 && Math.abs(velY) < 5) {
+        lensX = tX;
+        lensY = tY;
+        velX = 0;
+        velY = 0;
+      }
+    }
+
+    var speed = Math.sqrt(velX * velX + velY * velY);
+    var k = Math.min(1, speed / 1500);
+    var sx = 1 + k * .22;
+    var sy = 1 - k * .12;
+
+    dockLens.style.transform = "translate3d(" +
+      (lensX - dockRect.left - lensSize / 2).toFixed(2) + "px," +
+      (lensY - dockRect.top - lensSize / 2).toFixed(2) + "px,0) scale(" +
+      sx.toFixed(3) + "," + sy.toFixed(3) + ")";
+
+    var isMoving = k > .06;
+    if (isMoving !== movingClass) {
+      dockLens.classList.toggle("is-moving", isMoving);
+      movingClass = isMoving;
+    }
+
+    var show = lensVisible && P.x >= 0;
+    dockLens.style.opacity = show ? "1" : "0";
+    var lensHit = nearestTile(lensX, lensY);
+    setFocus(show && lensHit.distance < 40 ? lensHit.index : -1);
+
+    var disp;
+    if (!show) {
+      disp = 0;
+    } else if (dragging) {
+      disp = Math.max(.55, Math.min(1, speed / 1200));
+    } else {
+      disp = Math.min(1, speed / 1500);
+    }
+    dockLens.style.setProperty("--disp", disp.toFixed(3));
+
+    var settled = !dragging && !hovering && speed < 2 && !isMoving &&
+      Math.abs(tX - lensX) < 1 && Math.abs(tY - lensY) < 1;
+    if (settled) { stopFrameLoop(); return; }
+
+    rafId = window.requestAnimationFrame(frame);
+  }
+
+  function stopFrameLoop() {
+    running = false;
+    if (rafId) { window.cancelAnimationFrame(rafId); rafId = 0; }
+    lastFrameAt = 0;
+    dockLens.style.setProperty("--disp", "0");
+    if (movingClass) {
+      dockLens.classList.remove("is-moving");
+      movingClass = false;
+    }
+    setFocus(-1);
+  }
+
+  function startFrameLoop() {
+    if (running) return;
+    running = true;
+    lastFrameAt = 0;
+    rafId = window.requestAnimationFrame(frame);
+  }
+
+  dock.addEventListener("pointerdown", function (e) {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    dragging = true;
+    hovering = false;
+    lensVisible = true;
+    suppressClick = false;
+    downX = e.clientX;
+    downY = e.clientY;
+    P.x = e.clientX;
+    P.y = e.clientY;
+    fingerVelX = 0;
+    pressedIndex = nearestTile(P.x, P.y).index;
+    lastPointerAt = performance.now();
+    startFrameLoop();
+  });
+
+  dock.addEventListener("pointermove", function (e) {
+    var now = performance.now();
+    var prevX = P.x < 0 ? e.clientX : P.x;
+    var prevY = P.y < 0 ? e.clientY : P.y;
+    var moved = Math.sqrt((e.clientX - prevX) * (e.clientX - prevX) +
+                          (e.clientY - prevY) * (e.clientY - prevY));
+    var dt = Math.max(8, now - (lastPointerAt || now - 16));
+    lastPointerAt = now;
+
+    P.x = e.clientX;
+    P.y = e.clientY;
+
+    if (e.pointerType === "mouse" && !dragging) {
+      hovering = true;
+      lensVisible = true;
+    }
+
+    if (dragging) {
+      fingerVelX = ((e.clientX - prevX) / dt) * 1000;
+      pressedIndex = nearestTile(P.x, P.y).index;
+      if (Math.abs(e.clientX - downX) > 8 ||
+          Math.abs(e.clientY - downY) > 8) {
+        suppressClick = true;
+      }
+    }
+    startFrameLoop();
+  });
+
+  dock.addEventListener("pointerleave", function (e) {
+    if (e.pointerType === "mouse" && !dragging) {
+      hovering = false;
+      lensVisible = false;
+      startFrameLoop();
+    }
+  });
+
+  dock.addEventListener("click", function (e) {
+    if (suppressClick) {
+      suppressClick = false;
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true);
+
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    hovering = false;
+    var projectedX = P.x + fingerVelX * 0.1;
+    var hit = nearestTile(projectedX, P.y);
+    if (pressedIndex >= 0 && hit.index >= 0) {
+      hit.index = Math.min(Math.max(hit.index, pressedIndex - 1), pressedIndex + 1);
+    }
+    fingerVelX = 0;
+    if (hit.index >= 0) {
+      targetX = tileRects[hit.index].cx;
+      targetY = tileRects[hit.index].cy;
+    }
+    startFrameLoop();
+  }
+
+  window.addEventListener("pointerup", endDrag, { passive: true });
+  window.addEventListener("pointercancel", endDrag, { passive: true });
+
+  document.addEventListener("pointerdown", function (e) {
+    if (dock.contains(e.target)) return;
+    dragging = false;
+    hovering = false;
+    lensVisible = false;
+    startFrameLoop();
+  }, true);
+
+  window.addEventListener("resize", function () { rectFreshAt = 0; startFrameLoop(); });
+  window.addEventListener("scroll", function () { rectFreshAt = 0; }, { passive: true });
+
+  /* ======================================================================
+     10 · 底部面板
+     ====================================================================== */
+  var scrim = $("scrim");
+  var editorSheet = $("editorSheet");
+  var dataSheet = $("dataSheet");
+  var manageSheet = $("manageSheet");
+  var manageList = $("manageList");
+  var btnAddIcon = $("btnAddIcon");
+
+  btnAddIcon.addEventListener("click", function () {
+    closeSheets();
+    openEditor(-1);
+  });
+
+  function openSheet(sheet) {
+    scrim.classList.add("is-open");
+    sheet.classList.add("is-open");
+    document.body.classList.add("sheet-open");
+  }
+
+  function closeSheets() {
+    scrim.classList.remove("is-open");
+    editorSheet.classList.remove("is-open");
+    dataSheet.classList.remove("is-open");
+    manageSheet.classList.remove("is-open");
+    document.body.classList.remove("sheet-open");
+    editingIndex = -1;
+  }
+
+  scrim.addEventListener("click", closeSheets);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeSheets();
+  });
+
+  /* ======================================================================
+     11 · 编辑器（名称 / 链接 / MD3 图案 / 色调）
+     ====================================================================== */
+  var editorTitle = $("editorTitle");
+  var editorPreview = $("editorPreview");
+  var fName = $("fName");
+  var fUrl = $("fUrl");
+  var editorError = $("editorError");
+  var btnSave = $("btnSave");
+  var btnDelete = $("btnDelete");
+  var btnCancel = $("btnCancel");
+  var patternsEl = $("patterns");
+  var tonesEl = $("tones");
+
+  var editPattern = PATTERN_IDS[0];
+  var editTone = "primary";
+  var patternBtns = [];
+  var toneBtns = [];
+
+  PATTERN_IDS.forEach(function (id) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "md3-pattern-btn";
+    b.setAttribute("data-pattern", id);
+    b.setAttribute("aria-label", "图案 " + id);
+    b.innerHTML = svgFor(id);
+    b.addEventListener("click", function () {
+      editPattern = id;
+      syncEditor();
+    });
+    patternsEl.appendChild(b);
+    patternBtns.push(b);
+  });
+
+  TONE_IDS.forEach(function (id) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "md3-tone-btn";
+    b.setAttribute("data-tone", id);
+    b.style.setProperty("--tone-color", TONES[id]);
+    b.setAttribute("aria-label", "色调 " + id);
+    b.addEventListener("click", function () {
+      editTone = id;
+      syncEditor();
+    });
+    tonesEl.appendChild(b);
+    toneBtns.push(b);
+  });
+
+  function syncEditor() {
+    patternBtns.forEach(function (b) {
+      b.classList.toggle("is-selected", b.getAttribute("data-pattern") === editPattern);
+    });
+    toneBtns.forEach(function (b) {
+      b.classList.toggle("is-selected", b.getAttribute("data-tone") === editTone);
+    });
+    editorPreview.innerHTML = svgFor(editPattern);
+    editorPreview.style.setProperty("--tone", TONES[editTone]);
+  }
+
+  function showError(msg) {
+    editorError.textContent = msg;
+    editorError.hidden = false;
+  }
+
+  function openEditor(index) {
+    editingIndex = index;
+    var t = index >= 0 ? tiles[index] : null;
+
+    editorTitle.textContent = t ? "编辑图标" : "添加图标";
+    fName.value = t ? t.name : "";
+    fUrl.value = t ? t.url : "";
+    editPattern = t ? t.pattern : PATTERN_IDS[0];
+    editTone = t ? t.tone : "primary";
+    editorError.hidden = true;
+    btnDelete.hidden = !t;
+
+    syncEditor();
+    openSheet(editorSheet);
+  }
+
+  btnCancel.addEventListener("click", closeSheets);
+
+  btnSave.addEventListener("click", function () {
+    var rawUrl = (fUrl.value || "").trim();
+    if (!rawUrl) {
+      showError("请填写链接，例如 https://www.zhihu.com");
+      fUrl.focus();
+      return;
+    }
+
+    var t = normalizeTile({
+      name: fName.value,
+      url: rawUrl,
+      pattern: editPattern,
+      tone: editTone
+    }, editingIndex >= 0 ? editingIndex : tiles.length);
+
+    if (!t) {
+      showError("链接格式不正确，请检查后再保存");
+      return;
+    }
+
+    var isEdit = editingIndex >= 0;
+    if (isEdit) tiles[editingIndex] = t;
+    else tiles.push(t);
+
+    saveTiles();
+    renderDock();
+    closeSheets();
+    showSnack((isEdit ? "已保存 " : "已添加 ") + t.name);
+  });
+
+  btnDelete.addEventListener("click", function () {
+    if (editingIndex < 0) return;
+    deleteTile(editingIndex);
+  });
+
+  /* ======================================================================
+     12 · 数据面板
+     ====================================================================== */
+  var dataBtn = $("dataBtn");
+  var dataText = $("dataText");
+  var btnCopy = $("btnCopy");
+  var btnImport = $("btnImport");
+  var btnReset = $("btnReset");
+  var storageHint = $("storageHint");
+
+  dataBtn.addEventListener("click", function () {
+    dataText.value = JSON.stringify(tiles, null, 2);
+    if (!storageOK) {
+      storageHint.textContent =
+        "当前环境不支持本地存储（或已被禁用），改动只在本次会话有效。" +
+        "请复制下面这段文本保存，下次粘贴回来点「导入」。";
+    }
+    openSheet(dataSheet);
+  });
+
+  btnCopy.addEventListener("click", function () {
+    var text = dataText.value;
+    function fallback() {
+      dataText.focus();
+      dataText.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      showSnack(ok ? "已复制到剪贴板" : "复制失败，请长按文本手动复制");
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { showSnack("已复制到剪贴板"); },
+        fallback
+      );
+    } else {
+      fallback();
+    }
+  });
+
+  btnImport.addEventListener("click", function () {
+    var parsed = null;
+    try { parsed = JSON.parse(dataText.value); } catch (e) { parsed = null; }
+    if (parsed && !Array.isArray(parsed) && Array.isArray(parsed.tiles)) {
+      parsed = parsed.tiles;
+    }
+    if (!Array.isArray(parsed)) {
+      showSnack("导入失败：内容不是有效的图标列表");
+      return;
+    }
+
+    var clean = parsed.map(normalizeTile).filter(Boolean);
+    if (!clean.length) {
+      showSnack("导入失败：没有找到有效图标");
+      return;
+    }
+
+    tiles = clean;
+    saveTiles();
+    renderDock();
+    closeSheets();
+    showSnack("已导入 " + clean.length + " 个图标");
+  });
+
+  btnReset.addEventListener("click", function () {
+    tiles = DEFAULT_TILES.slice();
+    saveTiles();
+    renderDock();
+    closeSheets();
+    showSnack("已恢复默认图标");
+  });
+
+  /* ======================================================================
+     13 · Snackbar
+     ====================================================================== */
+  var snackbar = $("snackbar");
+  var snackbarText = $("snackbarText");
+  var snackbarAction = $("snackbarAction");
+  var snackTimer = null;
+  var snackAction = null;
+
+  function showSnack(text, actionLabel, action) {
+    window.clearTimeout(snackTimer);
+    snackbarText.textContent = text;
+    snackAction = action || null;
+
+    if (actionLabel && action) {
+      snackbarAction.textContent = actionLabel;
+      snackbarAction.hidden = false;
+    } else {
+      snackbarAction.hidden = true;
+    }
+
+    snackbar.classList.add("is-open");
+    snackTimer = window.setTimeout(function () {
+      snackbar.classList.remove("is-open");
+      snackAction = null;
+    }, actionLabel ? 5000 : 2600);
+  }
+
+  snackbarAction.addEventListener("click", function () {
+    var fn = snackAction;
+    snackAction = null;
+    snackbar.classList.remove("is-open");
+    if (fn) fn();
+  });
+
+  /* ======================================================================
+     14 · 启动
+     ====================================================================== */
+  function updateHint() {
+    var foot = $("footHint");
+    if (!storageOK) {
+      foot.textContent = "此环境不支持本地存储，改动仅本次有效 · 用右上角 ⋮ 备份";
+    } else {
+      foot.textContent = "长按图标可编辑 · 点 ＋ 添加 · 在图标上滑动看色散";
+    }
+  }
+
+  renderDock();
+  updateHint();
+  refreshLightTargets();
+
+  Array.prototype.forEach.call(
+    document.querySelectorAll(".md3-chip, .md3-send, .md3-icon-btn"),
+    attachRipple
+  );
+})();
+</script>
+</body>
+</html>
